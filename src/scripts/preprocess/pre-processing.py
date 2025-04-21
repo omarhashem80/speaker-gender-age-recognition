@@ -5,9 +5,10 @@ import webrtcvad
 from pydub import AudioSegment
 from pydub.effects import normalize
 from pydub.silence import split_on_silence
+from multiprocessing import Pool, cpu_count
 
-INPUT_FOLDER = "./"
-OUTPUT_FOLDER = "./result/"
+INPUT_FOLDER = "./data/raw"
+OUTPUT_FOLDER = "./data/preprocessed/"
 
 
 def load_audio(file_path):
@@ -23,12 +24,14 @@ def reduce_noise(audio_segment):
         reduced_samples.tobytes(),
         frame_rate=audio_segment.frame_rate,
         sample_width=audio_segment.sample_width,
-        channels=audio_segment.channels
+        channels=audio_segment.channels,
     )
     return reduced_audio
 
 
-def remove_silence(audio_segment, min_silence_len=500, silence_thresh=None, keep_silence=200):
+def remove_silence(
+    audio_segment, min_silence_len=500, silence_thresh=None, keep_silence=200
+):
     """Remove long silences from the audio"""
     if silence_thresh is None:
         silence_thresh = audio_segment.dBFS - 16  # Auto calculate if not provided
@@ -37,11 +40,13 @@ def remove_silence(audio_segment, min_silence_len=500, silence_thresh=None, keep
         audio_segment,
         min_silence_len=min_silence_len,
         silence_thresh=silence_thresh,
-        keep_silence=keep_silence
+        keep_silence=keep_silence,
     )
 
     if not chunks:
-        print("⚠️ Warning: No chunks found after silence removal. Returning original audio.")
+        print(
+            "⚠️ Warning: No chunks found after silence removal. Returning original audio."
+        )
         return audio_segment
 
     cleaned_audio = AudioSegment.empty()
@@ -69,13 +74,15 @@ def frame_audio(samples, sample_rate, frame_duration_ms=30, hop_duration_ms=10):
 
     frames = []
     for i in range(0, len(samples) - frame_length + 1, hop_length):
-        frame = samples[i:i + frame_length]
+        frame = samples[i : i + frame_length]
         frames.append((frame, i, i + frame_length))
 
     return frames
 
 
-def apply_webrtc_vad(audio_segment, aggressiveness=2, frame_duration_ms=30, hop_duration_ms=10):
+def apply_webrtc_vad(
+    audio_segment, aggressiveness=2, frame_duration_ms=30, hop_duration_ms=10
+):
     """
     Enhanced VAD processing with proper framing and overlap
     Returns a new AudioSegment with only VAD-approved speech segments
@@ -109,10 +116,7 @@ def apply_webrtc_vad(audio_segment, aggressiveness=2, frame_duration_ms=30, hop_
         return AudioSegment.silent(duration=0, frame_rate=sample_rate)
 
     return AudioSegment(
-        speech_samples.tobytes(),
-        frame_rate=sample_rate,
-        sample_width=2,
-        channels=1
+        speech_samples.tobytes(), frame_rate=sample_rate, sample_width=2, channels=1
     )
 
 
@@ -141,7 +145,7 @@ def smooth_speech_mask(mask, sample_rate, min_speech_gap_ms=200):
     for i in range(len(speech_ends) - 1):
         gap = speech_starts[i + 1] - speech_ends[i]
         if gap < min_gap_samples:
-            new_mask[speech_ends[i]:speech_starts[i + 1]] = True
+            new_mask[speech_ends[i] : speech_starts[i + 1]] = True
 
     return new_mask
 
@@ -153,7 +157,7 @@ def normalize_audio(audio_segment):
 
 def save_audio(audio_segment, output_path):
     """Save the audio to the specified path"""
-    audio_segment.export(output_path, format="wav")
+    audio_segment.export(output_path, format="mp3")
 
 
 def process_audio_file(input_path, output_path):
@@ -166,26 +170,33 @@ def process_audio_file(input_path, output_path):
 
     # 2. Noise reduction
     denoised_audio = reduce_noise(audio)
-    print(f"✅ Denoised | Duration: {len(denoised_audio) / 1000:.2f}s | dBFS: {denoised_audio.dBFS:.2f}")
+    print(
+        f"✅ Denoised | Duration: {len(denoised_audio) / 1000:.2f}s | dBFS: {denoised_audio.dBFS:.2f}"
+    )
 
     # 3. Silence removal (coarse)
     silence_removed_audio = remove_silence(denoised_audio)
     print(
-        f"✅ Silence removed | Duration: {len(silence_removed_audio) / 1000:.2f}s | dBFS: {silence_removed_audio.dBFS:.2f}")
+        f"✅ Silence removed | Duration: {len(silence_removed_audio) / 1000:.2f}s | dBFS: {silence_removed_audio.dBFS:.2f}"
+    )
 
     # 4. WebRTC VAD with proper framing
     vad_processed_audio = apply_webrtc_vad(
         silence_removed_audio,
         aggressiveness=2,
         frame_duration_ms=30,
-        hop_duration_ms=10
+        hop_duration_ms=10,
     )
-    print(f"✅ VAD processed | Duration: {len(vad_processed_audio) / 1000:.2f}s | dBFS: {vad_processed_audio.dBFS:.2f}")
+    print(
+        f"✅ VAD processed | Duration: {len(vad_processed_audio) / 1000:.2f}s | dBFS: {vad_processed_audio.dBFS:.2f}"
+    )
 
     # 5. Normalization
     if len(vad_processed_audio) > 0:
         normalized_audio = normalize_audio(vad_processed_audio)
-        print(f"✅ Normalized | Duration: {len(normalized_audio) / 1000:.2f}s | dBFS: {normalized_audio.dBFS:.2f}")
+        print(
+            f"✅ Normalized | Duration: {len(normalized_audio) / 1000:.2f}s | dBFS: {normalized_audio.dBFS:.2f}"
+        )
         save_audio(normalized_audio, output_path)
     else:
         print("🛑 No audio remaining after processing. Skipping save.")
@@ -193,16 +204,32 @@ def process_audio_file(input_path, output_path):
     print(f"✅ Saved processed file to {output_path}")
 
 
+def process_wrapper(filename):
+    if filename.endswith(".mp3"):
+        input_path = os.path.join(INPUT_FOLDER, filename)
+        output_filename = filename.replace(".mp3", "_preprocessed.mp3")
+        output_path = os.path.join(OUTPUT_FOLDER, output_filename)
+
+        # Skip if file already exists
+        if os.path.exists(output_path):
+            print(f"⏩ Skipping {filename} (already preprocessed)")
+            return
+
+        process_audio_file(input_path, output_path)
+
+
 def process_all_files(input_folder, output_folder):
-    """Process all mp3 files in the input folder"""
+    """Process all mp3 files in the input folder using maximum concurrency"""
     os.makedirs(output_folder, exist_ok=True)
-    for filename in os.listdir(input_folder):
-        if filename.endswith(".mp3"):
-            input_path = os.path.join(input_folder, filename)
-            output_filename = filename.replace(".mp3", "_processed.wav")
-            output_path = os.path.join(output_folder, output_filename)
-            process_audio_file(input_path, output_path)
+
+    mp3_files = [f for f in os.listdir(input_folder) if f.endswith(".mp3")]
+
+    max_processes = max(2, cpu_count() // 2)
+
+    with Pool(processes=max_processes) as pool:
+        pool.map(process_wrapper, mp3_files)
 
 
 if __name__ == "__main__":
+    print("🔊 Starting audio preprocessing...")
     process_all_files(INPUT_FOLDER, OUTPUT_FOLDER)
