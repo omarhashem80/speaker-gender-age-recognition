@@ -6,7 +6,9 @@ __pycache__/
 # C extensions
 *.so
 data/
-
+preprocessed_audio_files.zip
+kaggle/
+my-audio-dataset/
 *.tsv
 # Distribution / packaging
 .Python
@@ -137,6 +139,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+myenv/
 
 # Spyder project settings
 .spyderproject
