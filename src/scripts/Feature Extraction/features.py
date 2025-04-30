@@ -1,4 +1,3 @@
-import os
 import librosa
 import librosa.effects
 import numpy as np
@@ -8,6 +7,7 @@ from parselmouth.praat import call
 from tqdm import tqdm
 import time
 from multiprocessing import Pool, cpu_count
+from itertools import groupby
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -26,7 +26,6 @@ def load_audio(file_path, sr=18000):
         return None, None
 
 
-
 def aggregate_features(features, axis=1):
     return np.concatenate([np.mean(features, axis=axis), np.std(features, axis=axis)])
 
@@ -40,14 +39,19 @@ def extract_mfccs(y, sr, n_mfcc=20):
 
 
 def extract_pitch_stats(y, sr):
-    f0, _, _ = librosa.pyin(y, fmin=50, fmax=600, sr=sr, hop_length=512)
-    f0, _, _ = librosa.pyin(y, fmin=50, fmax=600, sr=sr, hop_length=512)
+    f0, voiced_flag, _ = librosa.pyin(y, fmin=50, fmax=600, sr=sr, hop_length=512)
     f0 = f0[~np.isnan(f0)]
+    voiced_fraction = np.mean(voiced_flag) if voiced_flag.size > 0 else 0
+    hop_time = 512 / sr
+    voiced_durations = [sum(1 for _ in group) * hop_time for key, group in groupby(voiced_flag) if key]
+    avg_voiced_duration = np.mean(voiced_durations) if voiced_durations else 0
     return np.array([
-        np.mean(f0) if f0.size else 0,
-        np.std(f0) if f0.size else 0,
-        np.min(f0) if f0.size else 0,
-        np.max(f0) if f0.size else 0,
+        np.mean(f0) if f0.size > 0 else 0,
+        np.std(f0) if f0.size > 0 else 0,
+        np.min(f0) if f0.size > 0 else 0,
+        np.max(f0) if f0.size > 0 else 0,
+        voiced_fraction,
+        avg_voiced_duration
     ])
 
 
@@ -55,11 +59,17 @@ def extract_formants_stats(file_path):
     try:
         snd = parselmouth.Sound(file_path)
         formant = call(snd, "To Formant (burg)", 0.01, 5, 5500, 0.025, 50)
-        values = [np.nanmean([formant.get_value_at_time(i, t)
-                              for t in np.arange(0, snd.duration, 0.01)]) for i in range(1, 4)]
-        return np.nan_to_num(values)
+        times = np.arange(0, snd.duration, 0.01)
+        formant_means = []
+        bandwidth_means = []
+        for i in range(1, 4):
+            fv = [formant.get_value_at_time(i, t) for t in times]
+            bv = [formant.get_bandwidth_at_time(i, t) for t in times]
+            formant_means.append(np.nanmean(fv))
+            bandwidth_means.append(np.nanmean(bv))
+        return np.hstack([np.nan_to_num(formant_means), np.nan_to_num(bandwidth_means)])
     except Exception:
-        return np.zeros(3)
+        return np.zeros(6)
 
 
 def extract_spectral_features(y, sr):
@@ -117,6 +127,23 @@ def extract_tonnetz(y, sr, fmin_note="C2"):
         return np.zeros(12)
 
 
+def extract_energy_stats(y, sr):
+    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
+    rms_range = np.max(rms) - np.min(rms) if rms.size > 0 else 0
+    return np.array([np.mean(rms), np.std(rms), rms_range])
+
+
+def extract_spectral_entropy(y, sr, n_fft=2048, hop_length=512):
+    try:
+        S = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop_length))
+        S_power = S ** 2
+        S_power /= np.sum(S_power, axis=0, keepdims=True) + 1e-10
+        entropy = -np.sum(S_power * np.log2(S_power + 1e-10), axis=0)
+        return np.array([np.mean(entropy), np.std(entropy)])
+    except Exception:
+        return np.zeros(2)
+
+
 # === Feature Extraction Wrapper ===
 def extract_features_from_path(args):
     file_path, label = args
@@ -134,10 +161,13 @@ def extract_features_from_path(args):
             extract_tonnetz(y, sr),
             extract_voice_quality(y, sr),
             extract_zcr(y),
+            extract_energy_stats(y, sr),
+            extract_spectral_entropy(y, sr)
         ])
         return (features, label)
     except Exception:
         return None
+
 
 # === Parallel Processing ===
 def process_csv(df, output_prefix, start_i=0):
@@ -156,17 +186,20 @@ def process_csv(df, output_prefix, start_i=0):
     output_path = f"{output_prefix}_{start_i}_{start_i + len(features_list) - 1}.csv"
     save_chunk(features_list, labels, output_path)
 
+
 def save_chunk(features_list, labels, output_path):
     df = pd.DataFrame(features_list)
     df['label'] = labels
     df.to_csv(output_path, index=False)
     print(f"✅ Saved {len(features_list)} entries to {output_path}")
 
+
 # === Path Formatter ===
 def formater(row):
     if row.endswith('.mp3'):
         base = row[:-4]
         return f"D:/College/Third Year/Second Term/Pattern/Project/data/{base}_preprocessed.mp3"
+
 
 # === Main Execution ===
 if __name__ == "__main__":
@@ -176,7 +209,7 @@ if __name__ == "__main__":
     df = pd.read_csv(input_csv)
     df['path'] = df['path'].apply(formater)
     output_csv_prefix = "D:/College/Third Year/Second Term/Pattern/Project/speaker-gender-age-recognition/output_features160_end"
-    process_csv(df[:1000], output_csv_prefix)
+    process_csv(df[:5], output_csv_prefix)
 
     elapsed_time = time.time() - start_time
     print(f"⏱️ Total execution time: {elapsed_time:.2f} seconds")
