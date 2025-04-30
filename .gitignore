@@ -10,6 +10,7 @@ preprocessed_audio_files.zip
 kaggle/
 my-audio-dataset/
 features_1/
+features_200/
 *.tsv
 # Distribution / packaging
 .Python
