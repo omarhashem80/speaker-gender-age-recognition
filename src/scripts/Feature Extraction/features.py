@@ -1,5 +1,6 @@
 import os
 import librosa
+import librosa.effects
 import numpy as np
 import pandas as pd
 import parselmouth
@@ -25,6 +26,7 @@ def load_audio(file_path, sr=18000):
         return None, None
 
 
+
 def aggregate_features(features, axis=1):
     return np.concatenate([np.mean(features, axis=axis), np.std(features, axis=axis)])
 
@@ -38,6 +40,7 @@ def extract_mfccs(y, sr, n_mfcc=20):
 
 
 def extract_pitch_stats(y, sr):
+    f0, _, _ = librosa.pyin(y, fmin=50, fmax=600, sr=sr, hop_length=512)
     f0, _, _ = librosa.pyin(y, fmin=50, fmax=600, sr=sr, hop_length=512)
     f0 = f0[~np.isnan(f0)]
     return np.array([
