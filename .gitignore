@@ -11,6 +11,7 @@ kaggle/
 my-audio-dataset/
 features_1/
 features_200/
+src/Feature Extraction/feature-extraction.ipynb
 *.tsv
 # Distribution / packaging
 .Python

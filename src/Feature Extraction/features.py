@@ -205,7 +205,7 @@ def formater(row):
 if __name__ == "__main__":
     start_time = time.time()
 
-    input_csv = "../../../filtered_data_cleaned.csv"
+    input_csv = "../../filtered_data_cleaned.csv"
     df = pd.read_csv(input_csv)
     df['path'] = df['path'].apply(formater)
     output_csv_prefix = "D:/College/Third Year/Second Term/Pattern/Project/speaker-gender-age-recognition/output_features160_end"
