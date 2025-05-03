@@ -26,7 +26,7 @@ def infer(data_dir, dataset_csv_path):
     X_processed = preprocessor.transform(features_df)
     # Load trained model
     # TODO: MODIFY THE NAMES OF FILE
-    model = joblib.load("src/Modeling/.classifier.joblib")
+    model = joblib.load("src/Modeling/classifier.joblib")
     # Predict
     predictions = model.predict(X_processed)
     # Save predictions
