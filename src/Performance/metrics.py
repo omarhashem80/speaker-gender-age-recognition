@@ -2,21 +2,19 @@ from sklearn.metrics import (
     accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay,
     f1_score, roc_curve, roc_auc_score
 )
-import pandas as pd
 import joblib
 import os
 from sklearn.preprocessing import StandardScaler, label_binarize
-from sklearn.model_selection import train_test_split
 import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings('ignore')
 
+
 # Function to evaluate the model and save the results
-def evaluate_and_save_model(model, X_train, y_train, X_test, y_test, preprocessor=None, class_names=None, output_dir='./evaluation_results'):
+def evaluate_and_save_model(model, X_train, y_train, X_test, y_test, preprocessor=None, class_names=("M20", "F20", "M50", "F50"), output_dir='./evaluation_results'):
     # Apply preprocessing if needed
-    if preprocessor:
-        X_train = preprocessor.transform(X_train)
-        X_test = preprocessor.transform(X_test)
+    # if preprocessor:
+    #     X_test = preprocessor.transform(X_test)
 
     # Predict on training data
     y_train_pred = model.predict(X_train)
@@ -38,7 +36,7 @@ def evaluate_and_save_model(model, X_train, y_train, X_test, y_test, preprocesso
     evaluate_model(y_test, y_test_pred, y_test_pred_proba, class_names, output_dir, "test")
 
 
-def evaluate_model(y_true, y_pred, y_pred_proba=None, class_names=None, output_dir='./evaluation_results', data_type="data"):
+def evaluate_model(y_true, y_pred, y_pred_proba=None, class_names=("M20", "F20", "M50", "F50"), output_dir='./evaluation_results', data_type="data"):
     # Basic metrics
     acc = accuracy_score(y_true, y_pred)
     macro_f1 = f1_score(y_true, y_pred, average='macro')
@@ -82,7 +80,7 @@ def evaluate_model(y_true, y_pred, y_pred_proba=None, class_names=None, output_d
         for i in range(len(class_names)):
             fpr, tpr, _ = roc_curve(y_true_bin[:, i], y_pred_proba[:, i])
             fig_roc.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=f'ROC - {class_names[i]}'))
-        fig_roc.add_trace(go.Scatter(x=[0,1], y=[0,1], mode='lines', name='Random', line=dict(dash='dash')))
+        fig_roc.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='Random', line=dict(dash='dash')))
         fig_roc.update_layout(
             title=f"{data_type.capitalize()} ROC Curves",
             xaxis_title="False Positive Rate",
@@ -97,45 +95,19 @@ def evaluate_model(y_true, y_pred, y_pred_proba=None, class_names=None, output_d
         with open(os.path.join(output_dir, f"{data_type}_roc_auc.txt"), 'w') as f:
             f.write(f"Macro ROC AUC Score: {auc_score:.4f}\n")
 
-# Example usage
+
 if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(script_dir, "../Modeling/classifier.joblib")
-
     model_path = os.path.abspath(model_path)
-
     # Load the model
     model = joblib.load(model_path)
-    
-    def load_and_concatenate(folder_path):
-        dataframes = []
-        for filename in os.listdir(folder_path):
-            if filename.endswith('.csv'):
-                file_path = os.path.join(folder_path, filename)
-                df = pd.read_csv(file_path)
-                dataframes.append(df)
-        return pd.concat(dataframes, ignore_index=True)
-    # df = pd.read_csv("D:/College/Third Year/Second Term/Pattern/Project/speaker-gender-age-recognition/all_features.csv")
-    script_directory = os.path.dirname(os.path.abspath(__file__))
+    preprocessor_path = os.path.join(script_dir, "../Modeling/preprocessor.joblib")
+    preprocessor_path = os.path.abspath(model_path)
+    preprocessor = joblib.load(preprocessor_path)
 
-    features_folder_path = os.path.join(script_directory, "../../features_200")
-
-    folder_path = os.path.abspath(features_folder_path)
-    target = 'label'
-    df = load_and_concatenate(folder_path)
-
-    # Split the data and preprocess
-    target_column = 'label'
-    X = df.drop(columns=[target_column])
-    y = df[target_column]
-    
-    # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-
-    # Preprocessing: StandardScaler
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-
-    # Evaluate and save the results
-    evaluate_and_save_model(model, X_train_scaled, y_train, X_test_scaled, y_test, preprocessor=scaler, class_names=["M20", "F20", "M50", "F50"])
+    from src.Modeling.preprocessor import preprocessing
+    import pandas as pd
+    df = pd.read_csv("../data.csv")
+    X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline = preprocessing(df, 'label')
+    evaluate_and_save_model(model, X_train_resampled, y_train_resampled, X_test_transformed, y_test, preprocessor)

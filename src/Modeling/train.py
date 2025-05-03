@@ -1,27 +1,44 @@
-from sklearn.model_selection import GridSearchCV
-from xgboost import XGBClassifier
 import joblib
+from xgboost import XGBClassifier
+from sklearn.model_selection import GridSearchCV
+import os
 
 
+def training(X_train, y_train):
+    """
+    Trains an XGBoost classifier using grid search with cross-validation,
+    tunes hyperparameters, and saves the best model to a file.
 
-def train_and_save_model(X_train, y_train, filename="classifier.joblib"):
+    Parameters:
+    ----------
+    X_train : np.ndarray or pd.DataFrame
+        The training feature data.
+
+    y_train : np.ndarray or pd.Series
+        The training target labels.
+
+    Returns:
+    -------
+    best_model
+    """
+
     print("Training model with cross-validation and tuning...")
 
-    # Define base model
+    # Define the base XGBoost classifier
     base_model = XGBClassifier(
         objective='multi:softmax',
         eval_metric='mlogloss',
         random_state=42,
-        n_jobs=-1,
+        n_jobs=-1
     )
 
-    # hyperparameter tuning
+    # Hyperparameter grid for tuning
     param_grid = {
-        'n_estimators': [200],
-        'learning_rate': [0.05, 0.1, 0.3]
+        'n_estimators': [200],         # Number of trees
+        'learning_rate': [0.05, 0.1, 0.3]  # Learning rates to try
     }
 
-    #Grid Search with 5-fold CV
+    # Perform grid search with 5-fold cross-validation
     grid_search = GridSearchCV(
         estimator=base_model,
         param_grid=param_grid,
@@ -30,47 +47,33 @@ def train_and_save_model(X_train, y_train, filename="classifier.joblib"):
         n_jobs=-1,
         verbose=1
     )
-  
 
+    # Fit model to training data
     grid_search.fit(X_train, y_train)
+
+    # Get the best model found during grid search
     best_model = grid_search.best_estimator_
-    best_model = grid_search
     print("Best parameters found:", grid_search.best_params_)
-    joblib.dump(best_model, filename)
-    print(f"Best model saved as '{filename}'")
+
+    # Get the directory of the script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define model save path relative to the script's directory
+    model_path = os.path.join(script_dir, "classifier.joblib")
+
+    # Convert to absolute path
+    model_path = os.path.abspath(model_path)
+
+    # Save the best model to a file
+    joblib.dump(best_model, model_path)
+    print(f"✅ Best model saved as '{model_path}'")
 
     return best_model
 
 
-
 if __name__ == "__main__":
-    import pandas as pd
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import StandardScaler
-    from imblearn.over_sampling import SMOTE
-    import os
-    # Load the dataframe
-    def load_and_concatenate(folder_path):
-        dataframes = []
-        for filename in os.listdir(folder_path):
-            if filename.endswith('.csv'):
-                file_path = os.path.join(folder_path, filename)
-                df = pd.read_csv(file_path)
-                dataframes.append(df)
-        return pd.concat(dataframes, ignore_index=True)
-    script_directory = os.path.dirname(os.path.abspath(__file__))
-
-    features_folder_path = os.path.join(script_directory, "../../features_200")
-
-    folder_path = os.path.abspath(features_folder_path)
-    target = 'label'
-    df = load_and_concatenate(folder_path)
-    X = df.drop(columns=["label"])
-    y = df["label"]
-
-    X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
-    X_train = StandardScaler().fit_transform(X_train)
-    X_train, y_train = SMOTE(random_state=42).fit_resample(X_train, y_train)
-
-    # Train and save the model
-    train_and_save_model(X_train, y_train)
+   from preprocessor import preprocessing
+   import pandas as pd
+   df = pd.read_csv("../data.csv")
+   X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline = preprocessing(df, 'label')
+   model = training(X_train_resampled, y_train_resampled)
