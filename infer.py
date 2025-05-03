@@ -23,12 +23,12 @@ def infer(data_dir, dataset_csv_path):
 
     preprocessor = joblib.load("src/Modeling/preprocessor.joblib")
     #  Transform features
-    # X_processed = preprocessor.transform(features_df)
+    X_processed = preprocessor.transform(features_df)
     # Load trained model
     # TODO: MODIFY THE NAMES OF FILE
     model = joblib.load("src/Modeling/.classifier.joblib")
     # Predict
-    predictions = model.predict(features_df)
+    predictions = model.predict(X_processed)
     # Save predictions
     results_path = os.path.join(data_dir, "results.txt")
     with open(results_path, "w") as f:
