@@ -3,6 +3,8 @@ from src.DataCleaning.dataCleaning import DataCleaning
 from src.preprocess.preprocess import process_all_files
 from src.FeatureExtraction.features import process_csv
 
+from huggingface_hub import hf_hub_download
+
 
 def infer(data_dir, dataset_csv_path):
 
@@ -21,12 +23,15 @@ def infer(data_dir, dataset_csv_path):
     # X = pd.read_csv(features_path)
     # Load preprocessing pipeline
 
-    preprocessor = joblib.load("src/Modeling/preprocessor.joblib")
-    #  Transform features
+    model_path = hf_hub_download(
+        repo_id="OmarHashem80/age_gender_classifier", filename="classifier.joblib"
+    )
+    model = joblib.load(model_path)
+    preprocessor_path = hf_hub_download(
+        repo_id="OmarHashem80/age_gender_classifier", filename="preprocessor.joblib"
+    )
+    preprocessor = joblib.load(preprocessor_path)
     X_processed = preprocessor.transform(features_df)
-    # Load trained model
-    # TODO: MODIFY THE NAMES OF FILE
-    model = joblib.load("src/Modeling/classifier.joblib")
     # Predict
     predictions = model.predict(X_processed)
     # Save predictions
