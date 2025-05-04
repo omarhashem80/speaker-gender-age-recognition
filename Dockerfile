@@ -10,12 +10,10 @@ RUN apt-get update && apt-get install -y ffmpeg
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
-COPY req2.txt .
-RUN pip install --no-cache-dir -r req2.txt
+
 
 # Copy files
 COPY . /app
-RUN apt-get update && apt-get install -y ffmpeg
 
 # Run the script
 CMD ["python3", "external_infer.py"]

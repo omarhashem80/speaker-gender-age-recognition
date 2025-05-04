@@ -75,14 +75,14 @@ def preprocessing(df, target_name):
 
     # Save the fitted pipeline to the specified file
     joblib.dump(pipeline, preprocessor_path)
-    print(f"✅ Preprocessor pipeline saved to '{preprocessor_path}'")
+    print(f"Preprocessor pipeline saved to '{preprocessor_path}'")
 
     # Apply SMOTE to handle class imbalance in training data
     smote = SMOTE(random_state=42)
     X_train_resampled, y_train_resampled = smote.fit_resample(
         X_train_transformed, y_train
     )
-    print("✅ SMOTE applied to training data")
+    print("SMOTE applied to training data")
 
     return X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline
 

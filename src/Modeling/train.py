@@ -63,7 +63,7 @@ def training(X_train, y_train):
 
     # Save the best model to a file
     joblib.dump(best_model, model_path)
-    print(f"✅ Best model saved as '{model_path}'")
+    print(f"Best model saved as '{model_path}'")
 
     return best_model
 
