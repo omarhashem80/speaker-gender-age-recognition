@@ -4,6 +4,9 @@ from src.preprocess.preprocess import process_all_files
 from src.FeatureExtraction.features import process_csv
 
 from huggingface_hub import hf_hub_download
+import requests
+
+url = "https://omarhashem80-age-gender-classifier.hf.space/predict"
 
 
 def infer(data_dir, dataset_csv_path):
@@ -23,24 +26,28 @@ def infer(data_dir, dataset_csv_path):
     # X = pd.read_csv(features_path)
     # Load preprocessing pipeline
 
-    model_path = hf_hub_download(
-        repo_id="OmarHashem80/age_gender_classifier", filename="classifier.joblib"
-    )
-    model = joblib.load(model_path)
-    preprocessor_path = hf_hub_download(
-        repo_id="OmarHashem80/age_gender_classifier", filename="preprocessor.joblib"
-    )
-    preprocessor = joblib.load(preprocessor_path)
-    X_processed = preprocessor.transform(features_df)
+    # model_path = hf_hub_download(
+    #     repo_id="OmarHashem80/age_gender_classifier", filename="classifier.joblib"
+    # )
+    # model = joblib.load(model_path)
+    # preprocessor_path = hf_hub_download(
+    #     repo_id="OmarHashem80/age_gender_classifier", filename="preprocessor.joblib"
+    # )
+    # preprocessor = joblib.load(preprocessor_path)
+    # X_processed = preprocessor.transform(features_df)
     # Predict
-    predictions = model.predict(X_processed)
-    # Save predictions
-    results_path = os.path.join(data_dir, "results.txt")
-    with open(results_path, "w") as f:
-        for pred in predictions:
-            f.write(f"{pred}\n")
+    response = requests.post(url, json={"data": features_df.to_dict(orient="records")})
+    if response.status_code == 200:
+        predictions = response.json()["predictions"]
+        # Save predictions
+        results_path = os.path.join(data_dir, "results.txt")
+        with open(results_path, "w") as f:
+            for pred in predictions:
+                f.write(f"{pred}\n")
 
-    print(f"Inference completed. Predictions saved to {results_path}")
+        print(f"Inference completed. Predictions saved to {results_path}")
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
 
 
 if __name__ == "__main__":

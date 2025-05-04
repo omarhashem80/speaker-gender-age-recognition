@@ -13,6 +13,7 @@ features_1/
 features_200/
 src/Feature Extraction/feature-extraction.ipynb
 src/Modeling/feature_selection.ipynb
+src/FeatureExtraction/features_me.py
 *.tsv
 *.csv
 # Distribution / packaging

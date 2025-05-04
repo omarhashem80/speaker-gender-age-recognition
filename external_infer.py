@@ -2,11 +2,12 @@
 import subprocess
 import time
 
-def external_infer(infer_script_path, data_dir):
+
+def external_infer(infer_script_path, data_dir, dataset_path):
     start_time = time.time()
 
     # Run infer.py as a subprocess
-    subprocess.run(["python", infer_script_path, data_dir], check=True)
+    subprocess.run(["python", infer_script_path, data_dir, dataset_path], check=True)
     end_time = time.time()
     elapsed_time = end_time - start_time
 
@@ -16,5 +17,6 @@ def external_infer(infer_script_path, data_dir):
 
     print(f"Inference completed in {elapsed_time:.4f} seconds.")
 
+
 if __name__ == "__main__":
-    external_infer("infer.py", "test_data_dir/")
+    external_infer("infer.py", "data/", "merged_dataset.csv")
