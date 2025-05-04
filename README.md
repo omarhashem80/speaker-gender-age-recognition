@@ -33,7 +33,7 @@ docker build -t nn_p .
 docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output -it nn_p 
 ```
 
-> ✅ This will mount your local `data` and `output` directories into the container.
+>  This will mount your local `data` and `output` directories into the container.
 
 ### 5. Check the Results
 
