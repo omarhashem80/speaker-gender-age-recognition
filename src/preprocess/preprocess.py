@@ -46,7 +46,7 @@ def remove_silence(
 
     if not chunks:
         print(
-            "⚠️ Warning: No chunks found after silence removal. Returning original audio."
+            "Warning: No chunks found after silence removal. Returning original audio."
         )
         return audio_segment
 
@@ -113,7 +113,7 @@ def apply_webrtc_vad(
     speech_samples = samples[speech_mask]
 
     if len(speech_samples) == 0:
-        print("⚠️ Warning: No speech detected by VAD. Returning empty segment.")
+        print("Warning: No speech detected by VAD. Returning empty segment.")
         return AudioSegment.silent(duration=0, frame_rate=sample_rate)
 
     return AudioSegment(
@@ -167,18 +167,18 @@ def process_audio_file(input_path, output_path):
 
     # 1. Load original audio
     audio = load_audio(input_path)
-    print(f"✅ Loaded | Duration: {len(audio) / 1000:.2f}s | dBFS: {audio.dBFS:.2f}")
+    print(f"Loaded | Duration: {len(audio) / 1000:.2f}s | dBFS: {audio.dBFS:.2f}")
 
     # 2. Noise reduction
     denoised_audio = reduce_noise(audio)
     print(
-        f"✅ Denoised | Duration: {len(denoised_audio) / 1000:.2f}s | dBFS: {denoised_audio.dBFS:.2f}"
+        f"Denoised | Duration: {len(denoised_audio) / 1000:.2f}s | dBFS: {denoised_audio.dBFS:.2f}"
     )
 
     # 3. Silence removal (coarse)
     silence_removed_audio = remove_silence(denoised_audio)
     print(
-        f"✅ Silence removed | Duration: {len(silence_removed_audio) / 1000:.2f}s | dBFS: {silence_removed_audio.dBFS:.2f}"
+        f"Silence removed | Duration: {len(silence_removed_audio) / 1000:.2f}s | dBFS: {silence_removed_audio.dBFS:.2f}"
     )
 
     # 4. WebRTC VAD with proper framing
@@ -189,20 +189,20 @@ def process_audio_file(input_path, output_path):
         hop_duration_ms=10,
     )
     print(
-        f"✅ VAD processed | Duration: {len(vad_processed_audio) / 1000:.2f}s | dBFS: {vad_processed_audio.dBFS:.2f}"
+        f"VAD processed | Duration: {len(vad_processed_audio) / 1000:.2f}s | dBFS: {vad_processed_audio.dBFS:.2f}"
     )
 
     # 5. Normalization
     if len(vad_processed_audio) > 0:
         normalized_audio = normalize_audio(vad_processed_audio)
         print(
-            f"✅ Normalized | Duration: {len(normalized_audio) / 1000:.2f}s | dBFS: {normalized_audio.dBFS:.2f}"
+            f"Normalized | Duration: {len(normalized_audio) / 1000:.2f}s | dBFS: {normalized_audio.dBFS:.2f}"
         )
         save_audio(normalized_audio, output_path)
     else:
-        print("🛑 No audio remaining after processing. Skipping save.")
+        print("No audio remaining after processing. Skipping save.")
 
-    print(f"✅ Saved processed file to {output_path}")
+    print(f"Saved processed file to {output_path}")
 
 
 def process_wrapper(args):
@@ -220,7 +220,7 @@ def process_wrapper(args):
 
         # Skip if file already exists
         if os.path.exists(output_path):
-            print(f"⏩ Skipping {filename} (already preprocessed)")
+            print(f"Skipping {filename} (already preprocessed)")
             return
 
         process_audio_file(input_path, output_path)
