@@ -24,13 +24,13 @@ Place your test audio files inside the `data` folder in the project root directo
 ### 3. Build the Docker Image
 
 ```bash
-docker build -t speaker-gender-age-recognition .
+docker build -t nn_p .
 ```
 
 ### 4. Run the Container
 
 ```bash
-docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output -it speaker-gender-age-recognition
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output -it nn_p 
 ```
 
 > ✅ This will mount your local `data` and `output` directories into the container.
