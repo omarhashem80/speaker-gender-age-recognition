@@ -1,8 +1,14 @@
 import pandas as pd
 import os
+import re
 
 
 FOLDER_PATH = "./data/raw"
+
+
+def natural_sort_key(s):
+    parts = re.split(r"(\d+)", s)
+    return [int(part) if part.isdigit() else part.lower() for part in parts]
 
 
 def clean_audio_folder(folder_path: str = FOLDER_PATH):
@@ -20,7 +26,7 @@ def clean_data(data_dir: str, file_path: str) -> pd.DataFrame:
     else:
         df = pd.read_csv(file_path)
     # Remove Rows Containing Audio Files That Don't Exist
-    df = df.sort_values(by=["path"])
+    df = df.sort_values(by=["path"], key=lambda x: x.map(natural_sort_key))
     df = df[df["path"].apply(lambda x: os.path.exists(os.path.join(data_dir, x)))]
     df["path"] = df["path"].apply(lambda x: os.path.join(data_dir, x))
     # Remove unnecessary columns
