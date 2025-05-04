@@ -13,7 +13,7 @@ def infer(data_dir, dataset_csv_path):
 
     # TODO: MODIFIY THIS
 
-    # Load The Dataset from the data_dir
+    # # Load The Dataset from the data_dir
     pathes_df = DataCleaning(data_dir, dataset_csv_path)
     # Preprocess the data
     edited_pathes_df = process_all_files(
