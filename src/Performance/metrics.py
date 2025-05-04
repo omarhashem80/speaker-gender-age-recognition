@@ -4,7 +4,7 @@ from sklearn.metrics import (
 )
 import joblib
 import os
-from sklearn.preprocessing import StandardScaler, label_binarize
+from sklearn.preprocessing import  label_binarize
 import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings('ignore')
@@ -12,7 +12,6 @@ warnings.filterwarnings('ignore')
 
 # Function to evaluate the model and save the results
 def evaluate_and_save_model(model, X_train, y_train, X_test, y_test, preprocessor=None, class_names=("M20", "F20", "M50", "F50"), output_dir='./evaluation_results'):
-    # Apply preprocessing if needed
     # if preprocessor:
     #     X_test = preprocessor.transform(X_test)
 
@@ -98,7 +97,7 @@ def evaluate_model(y_true, y_pred, y_pred_proba=None, class_names=("M20", "F20",
 
 if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(script_dir, "../Modeling/classifier.joblib")
+    model_path = os.path.join(script_dir, "../Modeling/classifier92.joblib")
     model_path = os.path.abspath(model_path)
     # Load the model
     model = joblib.load(model_path)

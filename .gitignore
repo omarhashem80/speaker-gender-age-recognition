@@ -12,6 +12,7 @@ my-audio-dataset/
 features_1/
 features_200/
 src/Feature Extraction/feature-extraction.ipynb
+src/Modeling/feature_selection.ipynb
 *.tsv
 *.csv
 # Distribution / packaging
