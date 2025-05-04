@@ -239,7 +239,7 @@ def save_chunk(features_list, labels, output_path, isTrain) -> pd.DataFrame:
     if isTrain:
         df["label"] = labels
     df.to_csv(output_path, index=False)
-    print(f"✅ Saved {len(features_list)} entries to {output_path}")
+    print(f"Saved {len(features_list)} entries to {output_path}")
     return df
 
 
@@ -265,4 +265,4 @@ def formater(data_dir, row):
 #     features_df = process_csv(df[:5], output_csv_prefix)
 #     print(features_df.head())
 #     elapsed_time = time.time() - start_time
-#     print(f"⏱️ Total execution time: {elapsed_time:.2f} seconds")
+#     print(f"Total execution time: {elapsed_time:.2f} seconds")
