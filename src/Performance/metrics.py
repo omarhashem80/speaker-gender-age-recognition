@@ -152,14 +152,23 @@ def evaluate_model(
             f.write(f"Macro ROC AUC Score: {auc_score:.4f}\n")
 
 
-# ============================
-# Main Execution
-# ============================
+        # PR Curve
+        fig_pr = go.Figure()
+        for i in range(len(class_names)):
+            precision, recall, _ = precision_recall_curve(y_true_bin[:, i], y_pred_proba[:, i])
+            ap_score = average_precision_score(y_true_bin[:, i], y_pred_proba[:, i])
+            fig_pr.add_trace(go.Scatter(x=recall, y=precision, mode='lines', name=f'PR - {class_names[i]} (AP={ap_score:.2f})'))
+        fig_pr.update_layout(
+            title=f"{data_type.capitalize()} Precision-Recall Curves",
+            xaxis_title="Recall",
+            yaxis_title="Precision",
+            showlegend=True
+        )
+        fig_pr.write_html(os.path.join(output_dir, f"{data_type}_pr_curve.html"))
+        fig_pr.show()
 
-if __name__ == "__main__":
-    import sys
 
-    # Setup paths
+if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.abspath(os.path.join(script_dir, "..", ".."))
     sys.path.append(project_root)

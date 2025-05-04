@@ -253,3 +253,4 @@ def process_all_files(input_folder, output_folder, df: pd.DataFrame) -> pd.DataF
 if __name__ == "__main__":
     print("🔊 Starting audio preprocessing...")
     process_all_files(INPUT_FOLDER, OUTPUT_FOLDER)
+

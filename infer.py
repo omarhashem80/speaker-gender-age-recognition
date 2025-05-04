@@ -13,7 +13,7 @@ def infer(data_dir, dataset_csv_path):
 
     # TODO: MODIFIY THIS
 
-    # Load The Dataset from the data_dir
+    # # Load The Dataset from the data_dir
     pathes_df = DataCleaning(data_dir, dataset_csv_path)
     # Preprocess the data
     edited_pathes_df = process_all_files(
@@ -40,7 +40,8 @@ def infer(data_dir, dataset_csv_path):
     if response.status_code == 200:
         predictions = response.json()["predictions"]
         # Save predictions
-        results_path = os.path.join(data_dir, "results.txt")
+        results_path = "output\\results.txt"
+        # results_path = os.path.join(data_dir, "results.txt")
         with open(results_path, "w") as f:
             for pred in predictions:
                 f.write(f"{pred}\n")
