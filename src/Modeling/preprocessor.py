@@ -7,7 +7,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from imblearn.over_sampling import SMOTE
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
 
 
 def preprocessing(df, target_name):
@@ -55,10 +56,9 @@ def preprocessing(df, target_name):
     )
 
     # Define preprocessing pipeline: impute missing values and scale features
-    pipeline = Pipeline([
-        ('imputer', SimpleImputer(strategy='median')),
-        ('scaler', StandardScaler())
-    ])
+    pipeline = Pipeline(
+        [("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
+    )
 
     # Fit and transform training data, transform test data
     X_train_transformed = pipeline.fit_transform(X_train)
@@ -79,18 +79,20 @@ def preprocessing(df, target_name):
 
     # Apply SMOTE to handle class imbalance in training data
     smote = SMOTE(random_state=42)
-    X_train_resampled, y_train_resampled = smote.fit_resample(X_train_transformed, y_train)
+    X_train_resampled, y_train_resampled = smote.fit_resample(
+        X_train_transformed, y_train
+    )
     print("✅ SMOTE applied to training data")
 
     return X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Function to load and concatenate all CSV files in a folder
     def load_and_concatenate(folder_path):
         dataframes = []
         for filename in os.listdir(folder_path):
-            if filename.endswith('.csv'):
+            if filename.endswith(".csv"):
                 file_path = os.path.join(folder_path, filename)
                 df = pd.read_csv(file_path)
                 dataframes.append(df)
@@ -105,13 +107,15 @@ if __name__ == '__main__':
     # Convert to absolute path
     preprocessor_path = os.path.abspath(preprocessor_path)
 
-    # Specify the path for feature folder
-    features_folder_path = os.path.join(script_dir, "../../features_200")
-    folder_path = os.path.abspath(features_folder_path)
+    # # Specify the path for feature folder
+    # features_folder_path = os.path.join(script_dir, "../../features_200")
+    # folder_path = os.path.abspath(features_folder_path)
 
     # Load data
-    target_col = 'label'
-    df = load_and_concatenate(folder_path)
-
+    target_col = "label"
+    # df = load_and_concatenate(folder_path)
+    df = pd.read_csv("merged_output_features.csv")
     # Call function to preprocess and save the pipeline
-    X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline = preprocessing(df, target_name=target_col)
+    X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline = (
+        preprocessing(df, target_name=target_col)
+    )

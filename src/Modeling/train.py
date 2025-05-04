@@ -26,26 +26,23 @@ def training(X_train, y_train):
 
     # Define the base XGBoost classifier
     base_model = XGBClassifier(
-        objective='multi:softmax',
-        eval_metric='mlogloss',
-        random_state=42,
-        n_jobs=-1
+        objective="multi:softmax", eval_metric="mlogloss", random_state=42, n_jobs=-1
     )
 
     # Hyperparameter grid for tuning
     param_grid = {
-        'n_estimators': [200],         # Number of trees
-        'learning_rate': [0.05, 0.1, 0.3]  # Learning rates to try
+        "n_estimators": [200],  # Number of trees
+        "learning_rate": [0.05, 0.1, 0.3],  # Learning rates to try
     }
 
     # Perform grid search with 5-fold cross-validation
     grid_search = GridSearchCV(
         estimator=base_model,
         param_grid=param_grid,
-        scoring='accuracy',
+        scoring="accuracy",
         cv=5,
         n_jobs=-1,
-        verbose=1
+        verbose=1,
     )
 
     # Fit model to training data
@@ -72,8 +69,11 @@ def training(X_train, y_train):
 
 
 if __name__ == "__main__":
-   from preprocessor import preprocessing
-   import pandas as pd
-   df = pd.read_csv("../data.csv")
-   X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline = preprocessing(df, 'label')
-   model = training(X_train_resampled, y_train_resampled)
+    from preprocessor import preprocessing
+    import pandas as pd
+
+    df = pd.read_csv("merged_output_features.csv")
+    X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline = (
+        preprocessing(df, "label")
+    )
+    model = training(X_train_resampled, y_train_resampled)
