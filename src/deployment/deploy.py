@@ -1,17 +1,19 @@
-from huggingface_hub import hf_hub_download
-import joblib
 import pandas as pd
+import requests
 
-model_path = hf_hub_download(
-    repo_id="OmarHashem80/age_gender_classifier", filename="classifier.joblib"
-)
-model = joblib.load(model_path)
-preprocessor_path = hf_hub_download(
-    repo_id="OmarHashem80/age_gender_classifier", filename="preprocessor.joblib"
-)
-preprocessor = joblib.load(preprocessor_path)
+df = pd.read_csv("../data.csv").head()
+data = df.to_dict(orient="records")
 
-df = pd.read_csv("merged_output_features.csv").head()
-X = df.drop(columns=["label"])
-print(model.predict(preprocessor.transform(X)))
-print(df.label)
+
+url = "https://omarhashem80-age-gender-classifier.hf.space/predict"
+
+
+response = requests.post(url, json={"data": data})
+
+if response.status_code == 200:
+    predictions = response.json()["predictions"]
+    print("Predictions:", predictions)
+    print("True Labels:", df["label"].tolist())
+else:
+    print("Error:", response.status_code)
+    print("Response text:", response.text)
