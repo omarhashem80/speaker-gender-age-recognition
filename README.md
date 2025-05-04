@@ -13,7 +13,7 @@ Follow the steps below to set up and run the project:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/speaker-gender-age-recognition.git
+git clone https://github.com/omarhashem80/speaker-gender-age-recognition.git
 cd speaker-gender-age-recognition
 ```
 
