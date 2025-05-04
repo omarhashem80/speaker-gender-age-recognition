@@ -1,7 +1,7 @@
 # external_infer.py
 import subprocess
 import time
-
+import os 
 
 def external_infer(infer_script_path, data_dir, dataset_path):
     start_time = time.time()
@@ -12,7 +12,9 @@ def external_infer(infer_script_path, data_dir, dataset_path):
     elapsed_time = end_time - start_time
 
     # Save the time to time.txt
-    with open("output\\time.txt", "w") as f:
+    os.makedirs("output", exist_ok=True)
+    # Write to the file in the 'output' directory
+    with open(os.path.join("output", "time.txt"), "w") as f:
         f.write(f"{elapsed_time:.4f}\n")
 
     print(f"Inference completed in {elapsed_time:.4f} seconds.")

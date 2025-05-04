@@ -40,8 +40,9 @@ def infer(data_dir, dataset_csv_path):
     if response.status_code == 200:
         predictions = response.json()["predictions"]
         # Save predictions
-        results_path = "output\\results.txt"
-        # results_path = os.path.join(data_dir, "results.txt")
+        os.makedirs("output", exist_ok=True)
+
+        results_path = os.path.join("output", "results.txt")
         with open(results_path, "w") as f:
             for pred in predictions:
                 f.write(f"{pred}\n")

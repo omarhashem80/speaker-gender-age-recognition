@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="472b8e14-0a48-4769-bc38-0665eab6ce9c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/preprocess/preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocess/preprocess.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_data_dir/common_voice_en_157.mp3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_data_dir/common_voice_en_158.mp3" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,9 +106,6 @@
       <deployment type="docker-image">
         <settings />
       </deployment>
-      <deployment type="docker-image">
-        <settings />
-      </deployment>
       <method v="2" />
     </configuration>
     <configuration name="nn2" type="docker-deploy" factoryName="docker-image" temporary="true" server-name="Docker">
@@ -154,6 +147,7 @@
       <workItem from="1746360213084" duration="649000" />
       <workItem from="1746365037153" duration="644000" />
       <workItem from="1746369446233" duration="2004000" />
+      <workItem from="1746387689593" duration="327000" />
     </task>
     <servers />
   </component>

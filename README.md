@@ -1,3 +1,7 @@
+Here’s your updated README with everything related to Docker Hub removed:
+
+---
+
 # Speaker Gender and Age Recognition
 
 A Dockerized deep learning project for predicting speaker gender and age from audio files.
@@ -11,22 +15,22 @@ Follow the steps below to set up and run the project:
 ```bash
 git clone https://github.com/YOUR_USERNAME/speaker-gender-age-recognition.git
 cd speaker-gender-age-recognition
-````
+```
 
 ### 2. Prepare Your Data
 
 Place your test audio files inside the `data` folder in the project root directory.
 
-### 3. Pull the Docker Image
+### 3. Build the Docker Image
 
 ```bash
-docker pull abdelrahman370/speaker-gender-age-recognition:v1
+docker build -t speaker-gender-age-recognition .
 ```
 
 ### 4. Run the Container
 
 ```bash
-docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output -it abdelrahman370/speaker-gender-age-recognition:v1
+docker run -v $(pwd)/data:/app/data -v $(pwd)/output:/app/output -it speaker-gender-age-recognition
 ```
 
 > ✅ This will mount your local `data` and `output` directories into the container.
@@ -50,10 +54,3 @@ After the container runs, check the `output` folder. It will contain:
 ```
 
 ---
-
-## 📦 Docker Image
-
-* Docker Hub: [abdelrahman370/speaker-gender-age-recognition](https://hub.docker.com/r/abdelrahman370/speaker-gender-age-recognition)
-
----
-
