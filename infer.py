@@ -9,18 +9,18 @@ import requests
 url = "https://omarhashem80-age-gender-classifier.hf.space/predict"
 
 
-def infer(data_dir, dataset_csv_path):
+def infer(data_dir):
 
     # TODO: MODIFIY THIS
 
     # # Load The Dataset from the data_dir
-    pathes_df = DataCleaning(data_dir, dataset_csv_path)
+    # pathes_df = DataCleaning(data_dir, dataset_csv_path)
     # Preprocess the data
-    edited_pathes_df = process_all_files(
-        data_dir, f"{os.path.dirname(data_dir)}\\preprocessed", pathes_df
+    pathes_df = process_all_files(
+        data_dir, f"{os.path.dirname(data_dir)}\\preprocessed",
     )
     #  Load features from file
-    features_df = process_csv(edited_pathes_df, "output_features.csv")
+    features_df = process_csv(pathes_df, "output_features.csv")
     # features_path = os.path.join(data_dir, "features.csv")  # assuming features.csv
 
     # X = pd.read_csv(features_path)
@@ -55,5 +55,4 @@ if __name__ == "__main__":
     import numpy as np
 
     data_dir = sys.argv[1]
-    dataset_dir = sys.argv[2]
-    infer(data_dir, dataset_dir)
+    infer(data_dir)

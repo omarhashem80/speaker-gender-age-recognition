@@ -224,9 +224,10 @@ def process_wrapper(args):
             return
 
         process_audio_file(input_path, output_path)
+        return output_path
 
 
-def process_all_files(input_folder, output_folder, df: pd.DataFrame) -> pd.DataFrame:
+def process_all_files(input_folder, output_folder) -> pd.DataFrame:
     """Process all mp3 files in the input folder using maximum concurrency"""
     os.makedirs(output_folder, exist_ok=True)
 
@@ -235,19 +236,11 @@ def process_all_files(input_folder, output_folder, df: pd.DataFrame) -> pd.DataF
     ]
     args = [(filename, input_folder, output_folder) for filename in audio_files]
     max_processes = max(2, cpu_count() - 2)
-    df["path"] = df["path"].apply(
-        lambda x: os.path.join(
-            output_folder,
-            os.path.basename(x)
-            .replace(".mp3", "_preprocessed.mp3")
-            .replace(".wav", "_preprocessed.wav"),
-        )
-    )
 
     with Pool(processes=max_processes) as pool:
-        pool.map(process_wrapper, args)
+        output_paths = pool.map(process_wrapper, args)
+    return pd.DataFrame({"path": output_paths})
 
-    return df
 
 
 if __name__ == "__main__":

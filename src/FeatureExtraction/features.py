@@ -190,8 +190,8 @@ def extract_tonnetz(y, sr, fmin_note="C2"):
 
 # === Feature Extraction Wrapper ===
 def extract_features_from_path(args):
-    file_path, label = args
-    print(file_path, label)
+    file_path = args
+    print(file_path)
     y, sr = load_audio(file_path)
     if y is None or sr is None:
         return None
@@ -209,14 +209,15 @@ def extract_features_from_path(args):
                 extract_zcr(y),
             ]
         )
-        return (features, label)
+        return (features)
     except Exception:
         return None
 
 
 # === Parallel Processing ===
 def process_csv(df, output_prefix, isTrain=False, start_i=0):
-    inputs = [(row.path, row.label) for row in df.itertuples(index=False)]
+    
+    inputs = [(row.path) for row in df.itertuples(index=False)]
     with Pool(processes=cpu_count()) as pool:
         results = list(
             tqdm(pool.imap(extract_features_from_path, inputs), total=len(inputs))

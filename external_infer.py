@@ -3,11 +3,11 @@ import subprocess
 import time
 import os 
 
-def external_infer(infer_script_path, data_dir, dataset_path):
+def external_infer(infer_script_path, data_dir):
     start_time = time.time()
 
     # Run infer.py as a subprocess
-    subprocess.run(["python3", infer_script_path, data_dir, dataset_path], check=True)
+    subprocess.run(["python3", infer_script_path, data_dir], check=True)
     end_time = time.time()
     elapsed_time = end_time - start_time
 
@@ -21,4 +21,4 @@ def external_infer(infer_script_path, data_dir, dataset_path):
 
 
 if __name__ == "__main__":
-    external_infer("infer.py", "data/", "filtered_data_labeled.tsv")
+    external_infer("infer.py", "data/")
