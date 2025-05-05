@@ -209,7 +209,7 @@ def extract_features_from_path(args):
                 extract_zcr(y),
             ]
         )
-        return (features)
+        return features
     except Exception:
         return None
 
@@ -226,10 +226,10 @@ def process_csv(df, output_prefix, isTrain=False, start_i=0):
     features_list = []
     labels = []
     for result in results:
-        if result:
-            features, label = result
+        if result is not None:
+            features = result
             features_list.append(features)
-            labels.append(label)
+           
 
     output_path = f"{output_prefix}_{start_i}_{start_i + len(features_list) - 1}.csv"
     return save_chunk(features_list, labels, output_path, isTrain)

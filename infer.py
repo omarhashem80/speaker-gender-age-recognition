@@ -17,8 +17,9 @@ def infer(data_dir):
     # pathes_df = DataCleaning(data_dir, dataset_csv_path)
     # Preprocess the data
     pathes_df = process_all_files(
-        data_dir, f"{os.path.dirname(data_dir)}\\preprocessed",
+        data_dir, f"{os.path.dirname(data_dir)}/preprocessed",
     )
+    print(pathes_df.head())
     #  Load features from file
     features_df = process_csv(pathes_df, "output_features.csv")
     # features_path = os.path.join(data_dir, "features.csv")  # assuming features.csv
