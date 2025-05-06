@@ -221,7 +221,7 @@ def process_wrapper(args):
         # Skip if file already exists
         if os.path.exists(output_path):
             print(f"Skipping {filename} (already preprocessed)")
-            return
+            return output_path
 
         process_audio_file(input_path, output_path)
         return output_path
@@ -242,8 +242,6 @@ def process_all_files(input_folder, output_folder) -> pd.DataFrame:
     return pd.DataFrame({"path": output_paths})
 
 
-
 if __name__ == "__main__":
     print("🔊 Starting audio preprocessing...")
     process_all_files(INPUT_FOLDER, OUTPUT_FOLDER)
-

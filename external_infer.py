@@ -1,7 +1,8 @@
 # external_infer.py
 import subprocess
 import time
-import os 
+import os
+
 
 def external_infer(infer_script_path, data_dir):
     start_time = time.time()

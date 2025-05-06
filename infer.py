@@ -4,9 +4,14 @@ from src.preprocess.preprocess import process_all_files
 from src.FeatureExtraction.features import process_csv
 
 from huggingface_hub import hf_hub_download
-import requests
+import re
 
 url = "https://omarhashem80-age-gender-classifier.hf.space/predict"
+
+
+def natural_sort_key(s):
+    parts = re.split(r"(\d+)", s)
+    return [int(part) if part.isdigit() else part.lower() for part in parts]
 
 
 def infer(data_dir):
@@ -17,10 +22,14 @@ def infer(data_dir):
     # pathes_df = DataCleaning(data_dir, dataset_csv_path)
     # Preprocess the data
     pathes_df = process_all_files(
-        data_dir, f"{os.path.dirname(data_dir)}/preprocessed",
+        data_dir,
+        f"{os.path.abspath((data_dir))}\\preprocessed",
+    )
+    #  Load features from file
+    pathes_df = pathes_df.sort_values(
+        by=["path"], key=lambda x: x.map(natural_sort_key)
     )
     print(pathes_df.head())
-    #  Load features from file
     features_df = process_csv(pathes_df, "output_features.csv")
     # features_path = os.path.join(data_dir, "features.csv")  # assuming features.csv
 
@@ -41,7 +50,9 @@ def infer(data_dir):
     # Save predictions
     os.makedirs("output", exist_ok=True)
 
-    results_path = os.path.join("output", "results.txt")    # results_path = os.path.join(data_dir, "results.txt")
+    results_path = os.path.join(
+        "output", "results.txt"
+    )  # results_path = os.path.join(data_dir, "results.txt")
     with open(results_path, "w") as f:
         for pred in predictions:
             f.write(f"{pred}\n")

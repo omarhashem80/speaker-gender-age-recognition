@@ -80,7 +80,7 @@ def extract_formants_stats(file_path):
             ]
         )
     except Exception as e:
-        print(f"[ERROR] Formant extraction failed for {file_path}: {e}")
+        # print(f"[ERROR] Formant extraction failed for {file_path}: {e}")
         return np.array([0.0, 0.0, 0.0])
 
 
@@ -125,7 +125,7 @@ def extract_voice_quality(file_path, sr=16000, min_voiced_frames=10):
 
         return np.array([jitter, shimmer, hnr])
     except Exception as e:
-        print(f"[ERROR] Voice quality extraction failed for {file_path}: {e}")
+        # print(f"[ERROR] Voice quality extraction failed for {file_path}: {e}")
         return np.array([0.0, 0.0, 0.0])
 
 
@@ -216,7 +216,7 @@ def extract_features_from_path(args):
 
 # === Parallel Processing ===
 def process_csv(df, output_prefix, isTrain=False, start_i=0):
-    
+
     inputs = [(row.path) for row in df.itertuples(index=False)]
     with Pool(processes=cpu_count()) as pool:
         results = list(
@@ -229,7 +229,6 @@ def process_csv(df, output_prefix, isTrain=False, start_i=0):
         if result is not None:
             features = result
             features_list.append(features)
-           
 
     output_path = f"{output_prefix}_{start_i}_{start_i + len(features_list) - 1}.csv"
     return save_chunk(features_list, labels, output_path, isTrain)
