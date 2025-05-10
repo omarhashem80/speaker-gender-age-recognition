@@ -11,85 +11,88 @@ from imblearn.over_sampling import SMOTE
 warnings.filterwarnings("ignore")
 
 
-def preprocessing(df, target_name):
+def preprocessing(df, target_name, oversample=False):
     """
-    Loads and preprocesses the input DataFrame by handling missing values,
-    scaling features, applying SMOTE, and saving the preprocessing pipeline.
+    Preprocesses the input DataFrame by handling missing values,
+    scaling features, applying optional SMOTE oversampling, and
+    saving the preprocessing pipeline to a file.
 
-    Parameters:
+    Parameters
     ----------
     df : pandas.DataFrame
         The input dataset containing features and the target column.
-
     target_name : str
         The name of the target column in the dataset.
+    oversample : bool, optional (default=False)
+        Whether to apply SMOTE to balance class distribution in the training set.
 
-
-    Returns:
+    Returns
     -------
     X_train_resampled : np.ndarray
         Resampled and preprocessed training feature data.
-
     y_train_resampled : np.ndarray
         Corresponding labels for the resampled training data.
-
     X_test_transformed : np.ndarray
         Preprocessed test feature data.
-
     y_test : pandas.Series
         True labels for the test set.
-
     pipeline : sklearn.pipeline.Pipeline
         The fitted preprocessing pipeline (imputer + scaler).
     """
-
-    # Ensure the dataset has no missing values
     df.dropna(inplace=True)
 
     # Separate features and target
     X = df.drop(columns=[target_name])
     y = df[target_name]
 
-    # Split the data into train and test sets with stratified sampling
+    # Train-test split with stratification
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    # Define preprocessing pipeline: impute missing values and scale features
-    pipeline = Pipeline(
-        [("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
-    )
+    # Define pipeline: imputation + scaling
+    pipeline = Pipeline([
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler())
+    ])
 
-    # Fit and transform training data, transform test data
+    # Fit-transform training set, transform test set
     X_train_transformed = pipeline.fit_transform(X_train)
     X_test_transformed = pipeline.transform(X_test)
 
-    # Get the directory of the script
+    # Save the preprocessing pipeline
     script_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Define preprocessor save path relative to the script's directory
-    preprocessor_path = os.path.join(script_dir, "preprocessor.joblib")
-
-    # Convert to absolute path
-    preprocessor_path = os.path.abspath(preprocessor_path)
-
-    # Save the fitted pipeline to the specified file
+    preprocessor_path = os.path.abspath(os.path.join(script_dir, "preprocessor.joblib"))
     joblib.dump(pipeline, preprocessor_path)
     print(f"Preprocessor pipeline saved to '{preprocessor_path}'")
 
-    # Apply SMOTE to handle class imbalance in training data
-    smote = SMOTE(random_state=42)
-    X_train_resampled, y_train_resampled = smote.fit_resample(
-        X_train_transformed, y_train
-    )
-    print("SMOTE applied to training data")
+    # Apply SMOTE if oversample flag is True
+    X_train_resampled, y_train_resampled = X_train_transformed, y_train
+    if oversample:
+        smote = SMOTE(random_state=42)
+        X_train_resampled, y_train_resampled = smote.fit_resample(
+            X_train_resampled, y_train_resampled
+        )
+        print("SMOTE applied to training data")
 
     return X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline
 
 
 if __name__ == "__main__":
-    # Function to load and concatenate all CSV files in a folder
     def load_and_concatenate(folder_path):
+        """
+        Load and concatenate all CSV files in a given folder.
+
+        Parameters
+        ----------
+        folder_path : str
+            Path to the folder containing CSV files.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Concatenated DataFrame of all CSVs.
+        """
         dataframes = []
         for filename in os.listdir(folder_path):
             if filename.endswith(".csv"):
@@ -98,24 +101,16 @@ if __name__ == "__main__":
                 dataframes.append(df)
         return pd.concat(dataframes, ignore_index=True)
 
-    # Get the directory of the script
+    # Locate features folder
     script_dir = os.path.dirname(os.path.abspath(__file__))
+    folder_path = os.path.abspath(os.path.join(script_dir, "../../features_200"))
 
-    # Define preprocessor save path relative to the script's directory
-    preprocessor_path = os.path.join(script_dir, "preprocessor.joblib")
+    # Load and save all features
+    df = load_and_concatenate(folder_path)
+    df.to_csv("all_features.csv", index=False)
 
-    # Convert to absolute path
-    preprocessor_path = os.path.abspath(preprocessor_path)
-
-    # # Specify the path for feature folder
-    # features_folder_path = os.path.join(script_dir, "../../features_200")
-    # folder_path = os.path.abspath(features_folder_path)
-
-    # Load data
-    target_col = "label"
-    # df = load_and_concatenate(folder_path)
-    df = pd.read_csv("merged_output_features.csv")
-    # Call function to preprocess and save the pipeline
-    X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline = (
-        preprocessing(df, target_name=target_col)
-    )
+    # Uncomment and set the target column to use preprocessing
+    # target_col = "label"
+    # X_train_resampled, y_train_resampled, X_test_transformed, y_test, pipeline = preprocessing(
+    #     df, target_name=target_col, oversample=True
+    # )
