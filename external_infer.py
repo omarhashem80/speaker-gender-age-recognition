@@ -1,4 +1,3 @@
-# external_infer.py
 import subprocess
 import time
 import os

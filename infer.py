@@ -1,6 +1,5 @@
-# infer.py
 from src.DataCleaning.dataCleaning import DataCleaning
-from src.preprocess.preprocess import process_all_files
+from src.Preprocess.preprocess import process_all_files
 from src.FeatureExtraction.features import process_csv
 
 from huggingface_hub import hf_hub_download
@@ -16,7 +15,6 @@ def natural_sort_key(s):
 
 def infer(data_dir):
 
-    # TODO: MODIFIY THIS
 
     # # Load The Dataset from the data_dir
     # pathes_df = DataCleaning(data_dir, dataset_csv_path)

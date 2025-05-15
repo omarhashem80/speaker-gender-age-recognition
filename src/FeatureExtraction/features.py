@@ -255,14 +255,14 @@ def formater(data_dir, row):
 
 
 # === Main Execution ===
-# if __name__ == "__main__":
-#     start_time = time.time()
+if __name__ == "__main__":
+    start_time = time.time()
 
-#     input_csv = "filtered_data_cleaned.csv"
-#     df = pd.read_csv(input_csv)
-#     df["path"] = df["path"].apply(formater)
-#     output_csv_prefix = "output_features.csv"
-#     features_df = process_csv(df[:5], output_csv_prefix)
-#     print(features_df.head())
-#     elapsed_time = time.time() - start_time
-#     print(f"Total execution time: {elapsed_time:.2f} seconds")
+    input_csv = "filtered_data_cleaned.csv"
+    df = pd.read_csv(input_csv)
+    df["path"] = df["path"].apply(formater)
+    output_csv_prefix = "output_features.csv"
+    features_df = process_csv(df[:5], output_csv_prefix)
+    print(features_df.head())
+    elapsed_time = time.time() - start_time
+    print(f"Total execution time: {elapsed_time:.2f} seconds")
