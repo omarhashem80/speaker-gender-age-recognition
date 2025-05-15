@@ -1,5 +1,5 @@
 from src.DataCleaning.dataCleaning import DataCleaning
-from src.Preprocess.preprocess import process_all_files
+from src.Preprocessing.preprocess import process_all_files
 from src.FeatureExtraction.features import process_csv
 
 from huggingface_hub import hf_hub_download
