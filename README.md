@@ -137,7 +137,7 @@ The system writes two files to the `output/` directory:
 │   ├── FeatureExtraction/    # Feature computation modules
 │   ├── Modeling/             # Model training and hyperparameter tuning
 │   ├── Performance/          # Evaluation metrics and timing
-│   ├── Deployment/           # Optional: cloud deployment client
+│   ├── Deployment/           # cloud deployment client
 │   └── Preprocess/           # Full audio preprocessing pipeline
 │   ├── main.py               # Complete pipeline entry point
 │   └── main.ipynb            # Jupyter notebook version for dev
